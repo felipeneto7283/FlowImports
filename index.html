@@ -64,10 +64,64 @@
 ════════════════════════════════════════════════════════════ -->
 <div class="section-header">
   <div class="section-title">Produtos <em>●</em></div>
-  <div class="section-count" id="productCount">0 produtos</div>
+  <div class="section-header-right">
+    <div class="section-count" id="productCount">0 produtos</div>
+    <button class="filter-toggle-btn" onclick="openFilters()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/>
+      </svg>
+      Filtrar
+      <span class="filter-badge" id="filterBadge" style="display:none">0</span>
+    </button>
+    <button class="clear-filters-btn" id="clearFiltersBtn" onclick="clearAllFilters()" style="display:none">
+      ✕ Limpar
+    </button>
+  </div>
 </div>
 <div id="productsWrap">
   <div id="productsGrid"></div>
+</div>
+
+<!-- ── Painel de Filtros ── -->
+<div class="filter-overlay" id="filterPanel" onclick="if(event.target===this)closeFilters()">
+  <div class="filter-drawer">
+    <div class="filter-drawer-header">
+      <div class="filter-drawer-title">Filtrar Produtos</div>
+      <button class="filter-close-btn" onclick="closeFilters()">✕</button>
+    </div>
+
+    <div class="filter-section">
+      <div class="filter-section-label">Tamanho</div>
+      <div class="filter-chips" id="filterSizes"></div>
+    </div>
+
+    <div class="filter-section">
+      <div class="filter-section-label">Cor</div>
+      <div class="filter-chips" id="filterColors"></div>
+    </div>
+
+    <div class="filter-section">
+      <div class="filter-section-label">Faixa de Preço</div>
+      <div class="filter-price-row">
+        <div class="filter-price-field">
+          <label class="filter-price-label">Mín (R$)</label>
+          <input class="form-input filter-price-input" type="number" id="filterPriceMin"
+                 placeholder="0" min="0" oninput="applyPriceFilter()">
+        </div>
+        <div class="filter-price-sep">—</div>
+        <div class="filter-price-field">
+          <label class="filter-price-label">Máx (R$)</label>
+          <input class="form-input filter-price-input" type="number" id="filterPriceMax"
+                 placeholder="∞" min="0" oninput="applyPriceFilter()">
+        </div>
+      </div>
+    </div>
+
+    <div class="filter-drawer-footer">
+      <button class="filter-clear-all" onclick="clearAllFilters()">Limpar tudo</button>
+      <button class="filter-apply-btn" onclick="closeFilters()">Ver resultados</button>
+    </div>
+  </div>
 </div>
 
 <!-- ═══════════════════════════════════════════════════════════
@@ -124,12 +178,22 @@
     </div>
 
     <div class="form-group">
+      <label class="form-label">Quantidade</label>
+      <div class="qty-wrap">
+        <button class="qty-btn" id="qtyMinus" onclick="changeQty(-1)" disabled>−</button>
+        <span class="qty-val" id="modalQty">1</span>
+        <button class="qty-btn" id="qtyPlus"  onclick="changeQty(1)">+</button>
+        <span class="qty-total" id="modalQtyTotal"></span>
+      </div>
+    </div>
+
+    <div class="form-group">
       <label class="form-label">Observação (opcional)</label>
       <textarea class="form-textarea" id="modalObs"
                 placeholder="Algum detalhe especial?"></textarea>
     </div>
 
-    <button class="btn-confirm" onclick="addToCart()">
+    <button class="btn-confirm" id="addToCartBtn" onclick="addToCart()" disabled>
       🛒 Adicionar ao Carrinho
     </button>
   </div>
@@ -335,11 +399,24 @@
         <div class="form-row">
           <div class="form-group">
             <label class="form-label">Tamanhos (vírgula)</label>
-            <input class="form-input" id="pSizes" type="text" placeholder="P, M, G, GG, XGG">
+            <input class="form-input" id="pSizes" type="text" placeholder="P, M, G, GG, XGG"
+                   oninput="onSizesChange()">
           </div>
+        <div class="form-row">
           <div class="form-group">
             <label class="form-label">Tags (vírgula)</label>
             <input class="form-input" id="pTags" type="text" placeholder="Unissex, Algodão">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Cores (vírgula)</label>
+            <input class="form-input" id="pColors" type="text" placeholder="Preto, Branco, Vermelho">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Estoque por Tamanho *</label>
+          <div class="stock-fields-wrap" id="stockFieldsWrap">
+            <p style="color:var(--muted);font-size:0.85rem">Preencha os tamanhos acima para definir o estoque.</p>
           </div>
         </div>
 

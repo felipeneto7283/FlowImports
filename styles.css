@@ -214,14 +214,118 @@ body::before {
   font-size: 2rem; font-weight: 800;
   letter-spacing: 2px; text-transform: uppercase;
 }
-.section-title em {
-  font-style: normal; color: var(--red);
-}
+.section-title em { font-style: normal; color: var(--red); }
+.section-header-right { display: flex; align-items: center; gap: 10px; }
 .section-count {
   font-family: var(--font-mono); font-size: 1rem;
-  color: var(--muted); letter-spacing: 2px;
-  font-weight: 500;
+  color: var(--muted); letter-spacing: 2px; font-weight: 500;
 }
+.filter-toggle-btn {
+  display: flex; align-items: center; gap: 7px;
+  background: var(--bg3); border: 1px solid var(--border2);
+  color: var(--silver2); font-family: var(--font-head);
+  font-weight: 700; font-size: 0.85rem; letter-spacing: 1px;
+  text-transform: uppercase; padding: 8px 14px; border-radius: var(--radius);
+  cursor: pointer; transition: all var(--transition);
+}
+.filter-toggle-btn:hover { border-color: var(--red); color: var(--red); }
+.filter-badge {
+  background: var(--red); color: white; border-radius: 50%;
+  width: 18px; height: 18px; font-size: 0.68rem; font-weight: 800;
+  align-items: center; justify-content: center;
+}
+.clear-filters-btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: rgba(212,25,26,0.1); border: 1px solid var(--red-dim);
+  color: var(--red); font-family: var(--font-head);
+  font-weight: 700; font-size: 0.8rem; letter-spacing: 1px;
+  text-transform: uppercase; padding: 7px 12px; border-radius: var(--radius);
+  cursor: pointer; transition: all var(--transition);
+}
+.clear-filters-btn:hover { background: rgba(212,25,26,0.2); }
+
+/* ── PAINEL LATERAL DE FILTROS ───────────────────────────────── */
+.filter-overlay {
+  position: fixed; inset: 0; z-index: 800;
+  background: rgba(0,0,0,0.7);
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.2s;
+}
+.filter-overlay.open { opacity: 1; pointer-events: all; }
+.filter-overlay.open .filter-drawer { transform: translateX(0); }
+.filter-drawer {
+  position: absolute; top: 0; right: 0; bottom: 0;
+  width: 320px; max-width: 90vw;
+  background: var(--bg2); border-left: 1px solid var(--border2);
+  display: flex; flex-direction: column;
+  transform: translateX(100%);
+  transition: transform 0.25s cubic-bezier(.4,0,.2,1);
+  overflow-y: auto;
+}
+.filter-drawer-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 20px 22px 16px; border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; background: var(--bg2); z-index: 1;
+}
+.filter-drawer-title {
+  font-family: var(--font-head); font-size: 1.2rem;
+  font-weight: 800; letter-spacing: 2px; text-transform: uppercase;
+}
+.filter-close-btn {
+  background: var(--bg3); border: 1px solid var(--border2);
+  color: var(--silver2); border-radius: 50%;
+  width: 30px; height: 30px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 1rem; transition: all var(--transition);
+}
+.filter-close-btn:hover { background: var(--red); color: white; border-color: var(--red); }
+.filter-section { padding: 20px 22px; border-bottom: 1px solid var(--border); }
+.filter-section-label {
+  font-family: var(--font-mono); font-size: 0.72rem;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 12px; font-weight: 600;
+}
+.filter-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.filter-chip {
+  background: var(--bg); border: 1px solid var(--border2);
+  color: var(--silver2); font-family: var(--font-head);
+  font-size: 0.82rem; font-weight: 700; letter-spacing: 1px;
+  text-transform: uppercase; padding: 7px 14px;
+  border-radius: 5px; cursor: pointer; transition: all var(--transition);
+}
+.filter-chip:hover { border-color: var(--red-dim); color: var(--red); }
+.filter-chip.active { background: var(--red); border-color: var(--red); color: white; }
+.filter-price-row { display: flex; align-items: center; gap: 10px; }
+.filter-price-field { flex: 1; display: flex; flex-direction: column; gap: 5px; }
+.filter-price-label {
+  font-size: 0.7rem; letter-spacing: 1px; color: var(--muted);
+  text-transform: uppercase; font-family: var(--font-mono);
+}
+.filter-price-input { padding: 9px 12px !important; }
+.filter-price-sep { color: var(--muted); font-size: 0.9rem; padding-top: 20px; }
+.filter-drawer-footer {
+  display: flex; gap: 10px; padding: 20px 22px;
+  border-top: 1px solid var(--border);
+  position: sticky; bottom: 0; background: var(--bg2);
+}
+.filter-clear-all {
+  flex: 1; background: none; border: 1px solid var(--border2);
+  color: var(--muted); font-family: var(--font-head);
+  font-weight: 700; font-size: 0.85rem; letter-spacing: 1px;
+  text-transform: uppercase; padding: 12px;
+  border-radius: var(--radius); cursor: pointer; transition: all var(--transition);
+}
+.filter-clear-all:hover { border-color: var(--red); color: var(--red); }
+.filter-apply-btn {
+  flex: 2; background: var(--red); border: none;
+  color: white; font-family: var(--font-head);
+  font-weight: 800; font-size: 0.9rem; letter-spacing: 1px;
+  text-transform: uppercase; padding: 12px;
+  border-radius: var(--radius); cursor: pointer; transition: background var(--transition);
+}
+.filter-apply-btn:hover { background: var(--red-bright); }
+
+
 
 /* ── PRODUCTS GRID ───────────────────────────────────────────── */
 #productsWrap {
@@ -696,6 +800,76 @@ footer {
 .admin-link:hover {
   color: var(--red);
 }
+
+/* ── ESTOQUE — card badge ────────────────────────────────────── */
+.card-stock {
+  display: inline-block; font-size: 0.78rem; font-weight: 600;
+  margin-bottom: 8px; padding: 2px 8px; border-radius: 4px;
+}
+.card-stock.in-stock    { background:rgba(76,175,80,0.12); color:#4caf50; border:1px solid rgba(76,175,80,0.25); }
+.card-stock.low-stock   { background:rgba(255,160,0,0.12);  color:#ffa000; border:1px solid rgba(255,160,0,0.3); }
+.card-stock.out-of-stock{ background:rgba(212,25,26,0.1);   color:var(--red); border:1px solid var(--red-dim); }
+
+/* Card esgotado */
+.product-card.esgotado .card-img-wrap img { filter:grayscale(60%) opacity(0.6); }
+.product-card.esgotado .card-cta { background:var(--silver3)!important; cursor:not-allowed; opacity:0.6; }
+
+/* Admin stock label */
+.admin-prod-stock.in-stock    { color:#4caf50; }
+.admin-prod-stock.low-stock   { color:#ffa000; }
+.admin-prod-stock.out-of-stock{ color:var(--red); }
+
+/* ── TAMANHO ESGOTADO ────────────────────────────────────────── */
+.size-chip.size-out {
+  opacity: 0.3; cursor: not-allowed;
+  text-decoration: line-through;
+  border-color: var(--border) !important;
+  color: var(--muted) !important;
+}
+
+/* ── CAMPOS DE ESTOQUE DINÂMICO (admin) ──────────────────────── */
+.stock-fields-wrap {
+  display: flex; flex-wrap: wrap; gap: 10px; margin-top: 6px;
+}
+.stock-field { display: flex; flex-direction: column; gap: 5px; min-width: 72px; }
+.stock-size-label {
+  font-family: var(--font-mono); font-size: 0.78rem; font-weight: 700;
+  letter-spacing: 2px; text-transform: uppercase; color: var(--silver2); text-align: center;
+}
+.stock-qty-input {
+  width: 72px !important; text-align: center;
+  padding: 8px 6px !important;
+  font-family: var(--font-head) !important;
+  font-size: 1rem !important; font-weight: 700 !important;
+}
+
+/* ── SELETOR DE QUANTIDADE (modal produto) ───────────────────── */
+.qty-wrap { display: flex; align-items: center; gap: 12px; margin-top: 8px; }
+.qty-btn {
+  width: 36px; height: 36px; border-radius: 6px;
+  background: var(--bg3); border: 1px solid var(--border2);
+  color: var(--white); font-size: 1.2rem; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  transition: all var(--transition);
+}
+.qty-btn:hover:not(:disabled) { background: var(--red); border-color: var(--red); }
+.qty-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+.qty-val { font-family: var(--font-head); font-size: 1.4rem; font-weight: 900; min-width: 28px; text-align: center; }
+.qty-total { font-size: 0.9rem; color: var(--muted); }
+
+/* ── QUANTIDADE NO CARRINHO ──────────────────────────────────── */
+.cart-item-qty { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
+.cqty-btn {
+  width: 26px; height: 26px; border-radius: 5px;
+  background: var(--bg3); border: 1px solid var(--border2);
+  color: var(--white); font-size: 1rem; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  transition: all var(--transition);
+}
+.cqty-btn:hover:not(:disabled) { background: var(--red); border-color: var(--red); }
+.cqty-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+.cqty-num { font-family: var(--font-head); font-size: 1rem; font-weight: 800; min-width: 20px; text-align: center; }
+.cqty-label { font-size: 0.78rem; color: var(--muted); }
 
 /* ── ANIMATIONS ──────────────────────────────────────────────── */
 @keyframes fadeUp {

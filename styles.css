@@ -986,6 +986,25 @@ footer {
   color: white;
 }
 
+/* ── CAMPOS CPF / CNPJ ───────────────────────────────────────── */
+.doc-wrap {
+  display: flex; align-items: center; gap: 10px; margin-top: 6px;
+}
+.doc-field { flex: 1; display: flex; flex-direction: column; gap: 5px; }
+.doc-label {
+  font-family: var(--font-mono); font-size: 0.62rem;
+  letter-spacing: 2px; text-transform: uppercase; color: var(--silver2);
+}
+.doc-sep {
+  font-size: 0.7rem; color: var(--muted);
+  letter-spacing: 2px; text-transform: uppercase;
+  flex-shrink: 0; padding-top: 20px;
+}
+.doc-error {
+  color: var(--red); font-size: 0.75rem;
+  margin-top: 6px; display: none;
+}
+
 /* ── BOTÃO MERCADO PAGO ──────────────────────────────────────── */
 .btn-mp {
   background: #009ee3;

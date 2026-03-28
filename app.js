@@ -379,27 +379,63 @@ function openCheckout() {
   el('orderSummary').innerHTML = rows +
     `<div class="order-sum-total"><span>TOTAL</span><span class="val">${fmt(total)}</span></div>`;
 
-  // Reset PagarM — nenhuma opção selecionada, botão MP desabilitado
+  // Reset PagarM
   document.querySelectorAll('.pagarm-opt').forEach(b => b.classList.remove('selected'));
+  // Reset CPF/CNPJ
+  el('docCpf').value  = '';
+  el('docCnpj').value = '';
+  el('docError').style.display = 'none';
+  // Botão MP sempre desabilitado ao abrir
   el('mpBtn').disabled = true;
 
   openModal('checkoutModal');
 }
 
-/* ── PagarM: seleciona UM método, habilita botão MP ── */
+/* ── Máscara CPF: 000.000.000-00 ── */
+function fmtCpf(input) {
+  let v = input.value.replace(/\D/g, '').slice(0, 11);
+  if (v.length > 9)      v = v.replace(/(\d{3})(\d{3})(\d{3})(\d{0,2})/, '$1.$2.$3-$4');
+  else if (v.length > 6) v = v.replace(/(\d{3})(\d{3})(\d{0,3})/, '$1.$2.$3');
+  else if (v.length > 3) v = v.replace(/(\d{3})(\d{0,3})/, '$1.$2');
+  input.value = v;
+}
+
+/* ── Máscara CNPJ: 00.000.000/0000-00 ── */
+function fmtCnpj(input) {
+  let v = input.value.replace(/\D/g, '').slice(0, 14);
+  if (v.length > 12)     v = v.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{0,2})/, '$1.$2.$3/$4-$5');
+  else if (v.length > 8) v = v.replace(/(\d{2})(\d{3})(\d{3})(\d{0,4})/, '$1.$2.$3/$4');
+  else if (v.length > 5) v = v.replace(/(\d{2})(\d{3})(\d{0,3})/, '$1.$2.$3');
+  else if (v.length > 2) v = v.replace(/(\d{2})(\d{0,3})/, '$1.$2');
+  input.value = v;
+}
+
+/* ── Verifica se tem CPF (11 dígitos) OU CNPJ (14 dígitos) preenchido ── */
+function checkDocs() {
+  const cpf  = el('docCpf').value.replace(/\D/g, '');
+  const cnpj = el('docCnpj').value.replace(/\D/g, '');
+  const docOk = cpf.length === 11 || cnpj.length === 14;
+  const payOk = !!document.querySelector('.pagarm-opt.selected');
+  el('docError').style.display = 'none';
+  el('mpBtn').disabled = !(docOk && payOk);
+}
+
+/* ── PagarM: seleciona UM método, verifica docs ── */
 function selectPay(btn) {
-  // Remove seleção de todos
   document.querySelectorAll('.pagarm-opt').forEach(b => b.classList.remove('selected'));
-  // Seleciona apenas o clicado
   btn.classList.add('selected');
-  // Habilita botão MP
-  el('mpBtn').disabled = false;
+  checkDocs(); // reavalia se botão deve habilitar
 }
 
 /* ── Abre Mercado Pago ── */
 function goToMercadoPago() {
+  const cpf  = el('docCpf').value.replace(/\D/g, '');
+  const cnpj = el('docCnpj').value.replace(/\D/g, '');
+  if (cpf.length !== 11 && cnpj.length !== 14) {
+    el('docError').style.display = 'block';
+    return;
+  }
   const mpLink = state.settings.mpLink || 'https://www.mercadopago.com.br/';
-  // Limpa carrinho
   cart = [];
   saveCart();
   updateCartBadge();

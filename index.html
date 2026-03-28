@@ -121,8 +121,8 @@
                 placeholder="Algum detalhe especial?"></textarea>
     </div>
 
-    <button class="btn-confirm" onclick="buyOnWhatsApp()">
-      💬 Comprar pelo WhatsApp
+    <button class="btn-confirm" onclick="addToCart()">
+      🛒 Adicionar ao Carrinho
     </button>
   </div>
 </div>
@@ -191,6 +191,26 @@
           <span class="pagarm-check">✓</span>
         </button>
       </div>
+    </div>
+
+    <div class="form-group" style="margin-top:16px">
+      <label class="form-label">CPF ou CNPJ * <span style="color:var(--muted);font-weight:300;text-transform:none;letter-spacing:0">(pelo menos um obrigatório)</span></label>
+      <div class="doc-wrap">
+        <div class="doc-field">
+          <label class="doc-label">CPF</label>
+          <input class="form-input" id="docCpf" type="text"
+                 placeholder="000.000.000-00" maxlength="14"
+                 oninput="fmtCpf(this); checkDocs()">
+        </div>
+        <div class="doc-sep">ou</div>
+        <div class="doc-field">
+          <label class="doc-label">CNPJ</label>
+          <input class="form-input" id="docCnpj" type="text"
+                 placeholder="00.000.000/0000-00" maxlength="18"
+                 oninput="fmtCnpj(this); checkDocs()">
+        </div>
+      </div>
+      <div class="doc-error" id="docError">Informe ao menos CPF ou CNPJ.</div>
     </div>
 
     <button class="btn-confirm btn-mp" id="mpBtn" onclick="goToMercadoPago()" disabled>

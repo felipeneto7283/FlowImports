@@ -237,32 +237,7 @@
 
     <div class="form-group" style="margin-top:18px">
       <label class="form-label">Forma de Pagamento *</label>
-      <div class="pagarm-wrap">
-        <button type="button" class="pagarm-opt" data-pay="PIX" onclick="selectPay(this)">
-          <span class="pagarm-icon">💠</span>
-          <div class="pagarm-text">
-            <span class="pagarm-label">PIX</span>
-            <span class="pagarm-desc">Aprovação imediata</span>
-          </div>
-          <span class="pagarm-check">✓</span>
-        </button>
-        <button type="button" class="pagarm-opt" data-pay="Parcelado" onclick="selectPay(this)">
-          <span class="pagarm-icon">💳</span>
-          <div class="pagarm-text">
-            <span class="pagarm-label">Parcelado</span>
-            <span class="pagarm-desc">Cartão de crédito</span>
-          </div>
-          <span class="pagarm-check">✓</span>
-        </button>
-        <button type="button" class="pagarm-opt" data-pay="Boleto" onclick="selectPay(this)">
-          <span class="pagarm-icon">📄</span>
-          <div class="pagarm-text">
-            <span class="pagarm-label">Boleto</span>
-            <span class="pagarm-desc">Vence em 3 dias úteis</span>
-          </div>
-          <span class="pagarm-check">✓</span>
-        </button>
-      </div>
+      <div class="pagarm-wrap" id="pagarmWrap"></div>
     </div>
 
     <div class="form-group" style="margin-top:16px">

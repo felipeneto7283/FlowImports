@@ -495,16 +495,78 @@ function removeCartItem(id){
 /* ══════════════════════════════════════════════════════════════
    CHECKOUT — PagarM + Mercado Pago
 ══════════════════════════════════════════════════════════════ */
+
+/* Calcula máximo de parcelas: 1 parcela a cada R$50, máx 4 */
+function maxParcelas(total){
+  return Math.min(4, Math.max(1, Math.floor(total / 50)));
+}
+
 function openCheckout(){
   if(!cart.length) return;
   closeAllModals();
+
   const total=cart.reduce((a,b)=>a+b.price,0);
+
+  // Resumo do pedido
   const rows=cart.map(i=>`<div class="order-sum-row"><span>${i.name} (${i.size}) x${i.qty}</span><span>${fmt(i.price)}</span></div>`).join('');
   el('orderSummary').innerHTML=rows+`<div class="order-sum-total"><span>TOTAL</span><span class="val">${fmt(total)}</span></div>`;
-  document.querySelectorAll('.pagarm-opt').forEach(b=>b.classList.remove('selected'));
+
+  // Gera opções de pagamento dinamicamente
+  const maxP=maxParcelas(total);
+  const opts=[];
+
+  // PIX sempre disponível
+  opts.push({
+    pay:'PIX', icon:'💠',
+    label:'PIX',
+    desc:'Aprovação imediata',
+    installments: 1,
+  });
+
+  // Parcelado: só aparece se total >= R$100 (mínimo 2 parcelas)
+  if(maxP>=2){
+    for(let p=2;p<=maxP;p++){
+      opts.push({
+        pay:`Parcelado ${p}x`,
+        icon:'💳',
+        label:`${p}x de ${fmt(total/p)}`,
+        desc:`Cartão de crédito · ${p} parcelas sem juros`,
+        installments: p,
+      });
+    }
+  }
+
+  // Boleto sempre disponível
+  opts.push({
+    pay:'Boleto', icon:'📄',
+    label:'Boleto',
+    desc:'Vence em 3 dias úteis',
+    installments: 1,
+  });
+
+  el('pagarmWrap').innerHTML=opts.map(o=>`
+    <button type="button" class="pagarm-opt"
+            data-pay="${o.pay}"
+            data-installments="${o.installments}"
+            onclick="selectPay(this)">
+      <span class="pagarm-icon">${o.icon}</span>
+      <div class="pagarm-text">
+        <span class="pagarm-label">${o.label}</span>
+        <span class="pagarm-desc">${o.desc}</span>
+      </div>
+      <span class="pagarm-check">✓</span>
+    </button>`).join('');
+
+  // Reset docs e botão
   el('docCpf').value=''; el('docCnpj').value='';
   el('docError').style.display='none'; el('mpBtn').disabled=true;
+
   openModal('checkoutModal');
+}
+
+function selectPay(btn){
+  document.querySelectorAll('.pagarm-opt').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected'); checkDocs();
 }
 
 function fmtCpf(input){
@@ -530,17 +592,71 @@ function checkDocs(){
   el('docError').style.display='none';
   el('mpBtn').disabled=!(docOk&&payOk);
 }
-function selectPay(btn){
-  document.querySelectorAll('.pagarm-opt').forEach(b=>b.classList.remove('selected'));
-  btn.classList.add('selected'); checkDocs();
-}
-function goToMercadoPago(){
-  const cpf=el('docCpf').value.replace(/\D/g,'');
-  const cnpj=el('docCnpj').value.replace(/\D/g,'');
-  if(cpf.length!==11&&cnpj.length!==14){el('docError').style.display='block';return;}
-  const mpLink=state.settings.mpLink||'https://www.mercadopago.com.br/';
-  cart=[]; saveCart(); updateCartBadge(); closeAllModals();
-  window.open(mpLink,'_blank');
+/* ══════════════════════════════════════════════════════════════
+   CHECKOUT → BACKEND
+   O frontend envia apenas IDs, tamanhos e quantidades.
+   O preço real é calculado no servidor.
+══════════════════════════════════════════════════════════════ */
+
+/* URL do backend — em produção troque pelo domínio real */
+const BACKEND_URL    = 'http://localhost:4000';
+const INTERNAL_KEY   = 'troque-por-uma-chave-secreta-longa-aqui'; // mesma do .env
+
+function goToMercadoPago() {
+  const cpf  = el('docCpf').value.replace(/\D/g, '');
+  const cnpj = el('docCnpj').value.replace(/\D/g, '');
+
+  if (cpf.length !== 11 && cnpj.length !== 14) {
+    el('docError').style.display = 'block';
+    return;
+  }
+
+  const payBtn = document.querySelector('.pagarm-opt.selected');
+  if (!payBtn) return;
+
+  const paymentMethod = payBtn.dataset.pay; // ex: "PIX", "Parcelado 2x", "Boleto"
+  const installments  = parseInt(payBtn.dataset.installments ?? '1', 10);
+
+  /* Monta payload com IDs + tamanhos + quantidades — SEM preços */
+  const items = cart.map(i => ({
+    productId: i.pid,
+    size:      i.size,
+    qty:       i.qty,
+  }));
+
+  const payerDoc = cpf.length === 11
+    ? { type: 'CPF',  number: cpf  }
+    : { type: 'CNPJ', number: cnpj };
+
+  /* Desabilita botão e mostra loading */
+  const btn = el('mpBtn');
+  btn.disabled = true;
+  btn.textContent = 'Processando...';
+
+  fetch(`${BACKEND_URL}/api/checkout`, {
+    method:  'POST',
+    headers: {
+      'Content-Type':   'application/json',
+      'x-internal-key': INTERNAL_KEY,
+    },
+    body: JSON.stringify({ items, payerDoc, paymentMethod, installments }),
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (!data.ok || !data.checkoutUrl) {
+      throw new Error(data.error || 'Erro desconhecido.');
+    }
+    /* Limpa carrinho e redireciona para o Mercado Pago */
+    cart = []; saveCart(); updateCartBadge(); closeAllModals();
+    window.open(data.checkoutUrl, '_blank');
+  })
+  .catch(err => {
+    alert('Erro ao criar pagamento: ' + err.message);
+  })
+  .finally(() => {
+    btn.disabled    = false;
+    btn.textContent = 'Pagar com Mercado Pago';
+  });
 }
 
 /* ══════════════════════════════════════════════════════════════

@@ -1182,35 +1182,89 @@ footer {
 }
 
 /* ── CAMPOS CPF / CNPJ ───────────────────────────────────────── */
-.doc-wrap {
-  display: flex; align-items: center; gap: 10px; margin-top: 6px;
-}
-.doc-field { flex: 1; display: flex; flex-direction: column; gap: 5px; }
-.doc-label {
-  font-family: var(--font-mono); font-size: 0.62rem;
-  letter-spacing: 2px; text-transform: uppercase; color: var(--silver2);
-}
-.doc-sep {
-  font-size: 0.96rem; color: var(--muted);
-  letter-spacing: 2px; text-transform: uppercase;
-  flex-shrink: 0; padding-top: 20px;
-}
-.doc-error {
-  color: var(--red); font-size: 0.98rem;
-  margin-top: 6px; display: none;
-}
-
-/* ── BOTÃO MERCADO PAGO ──────────────────────────────────────── */
-.btn-mp {
-  background: #009ee3;
+/* ── BOTÃO WHATSAPP CHECKOUT ─────────────────────────────────── */
+.btn-whatsapp-checkout {
+  background: #25D366;
   margin-top: 20px;
   letter-spacing: 1px;
   transition: background var(--transition), opacity var(--transition);
 }
-.btn-mp:hover:not(:disabled) { background: #0082c8; opacity: 1; }
-.btn-mp:disabled {
+.btn-whatsapp-checkout:hover:not(:disabled) { background: #1fb558; opacity: 1; }
+.btn-whatsapp-checkout:disabled {
   background: var(--border2);
   color: var(--muted);
   cursor: not-allowed;
   opacity: 1;
 }
+
+/* ── MODAL PIX ───────────────────────────────────────────────── */
+.pix-modal-header {
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  margin-bottom: 20px;
+}
+.pix-modal-icon { font-size: 2.4rem; line-height: 1; }
+.pix-modal-title {
+  font-family: var(--font-head); font-size: 1.5rem;
+  font-weight: 800; letter-spacing: 2px; text-transform: uppercase;
+}
+.pix-modal-receiver {
+  background: var(--bg3); border: 1px solid var(--border2);
+  border-radius: var(--radius); padding: 14px 18px;
+  margin-bottom: 14px; text-align: left;
+}
+.pix-receiver-label {
+  font-family: var(--font-mono); font-size: 0.65rem;
+  letter-spacing: 2px; color: var(--muted); text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.pix-receiver-name {
+  font-family: var(--font-head); font-size: 1.1rem;
+  font-weight: 700; color: var(--white);
+}
+.pix-key-wrap {
+  background: var(--bg3); border: 1px solid var(--border2);
+  border-radius: var(--radius); padding: 14px 18px;
+  margin-bottom: 16px; text-align: left;
+}
+.pix-key-label {
+  font-family: var(--font-mono); font-size: 0.65rem;
+  letter-spacing: 2px; color: var(--muted); text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.pix-key-row {
+  display: flex; align-items: center; gap: 10px;
+}
+.pix-key-value {
+  font-family: var(--font-mono); font-size: 1.15rem;
+  font-weight: 700; color: var(--white); flex: 1;
+  letter-spacing: 1px;
+}
+.pix-copy-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--bg2); border: 1px solid var(--border2);
+  color: var(--silver2); font-family: var(--font-body);
+  font-size: 0.82rem; font-weight: 600;
+  padding: 7px 12px; border-radius: 6px;
+  cursor: pointer; transition: all var(--transition);
+  flex-shrink: 0;
+}
+.pix-copy-btn:hover { border-color: var(--red); color: var(--red); }
+.pix-copy-btn.copied { background: rgba(76,175,80,0.15); border-color: #4caf50; color: #4caf50; }
+.pix-copied-msg {
+  font-size: 0.78rem; color: #4caf50; font-weight: 600;
+  margin-top: 8px; opacity: 0;
+  transition: opacity 0.2s;
+}
+.pix-copied-msg.show { opacity: 1; }
+
+.pix-note {
+  display: flex; align-items: flex-start; gap: 12px;
+  background: rgba(212,25,26,0.08);
+  border: 1px solid rgba(212,25,26,0.3);
+  border-left: 3px solid var(--red);
+  border-radius: var(--radius); padding: 14px 16px;
+  text-align: left; font-size: 0.88rem; line-height: 1.5;
+  color: var(--silver);
+}
+.pix-note-icon { font-size: 1.2rem; flex-shrink: 0; margin-top: 1px; }
+.pix-note strong { color: var(--red); display: block; margin-bottom: 3px; font-size: 0.9rem; }

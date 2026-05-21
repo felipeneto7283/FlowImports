@@ -216,21 +216,21 @@
         <div class="cart-total-value" id="cartTotal">R$ 0,00</div>
       </div>
       <button class="btn-confirm" id="checkoutBtn" onclick="openCheckout()" disabled>
-        Finalizar Pedido ➜
+        💬 Finalizar pelo WhatsApp
       </button>
     </div>
   </div>
 </div>
 
 <!-- ═══════════════════════════════════════════════════════════
-     MODAL — CHECKOUT (PagarM)
+     MODAL — CHECKOUT (WhatsApp)
 ════════════════════════════════════════════════════════════ -->
 <div class="modal-overlay" id="checkoutModal">
   <div class="modal-box">
     <button class="modal-close-btn" onclick="closeModal('checkoutModal')">✕</button>
     <div class="checkout-title">Finalizar Pedido</div>
     <p style="color:var(--muted);font-size:.8rem;margin-bottom:16px">
-      Escolha como deseja pagar
+      Revise seu pedido e finalize pelo WhatsApp
     </p>
 
     <div class="order-summary-box" id="orderSummary"></div>
@@ -240,36 +240,59 @@
       <div class="pagarm-wrap" id="pagarmWrap"></div>
     </div>
 
-    <div class="form-group" style="margin-top:16px">
-      <label class="form-label">CPF ou CNPJ * <span style="color:var(--muted);font-weight:300;text-transform:none;letter-spacing:0">(pelo menos um obrigatório)</span></label>
-      <div class="doc-wrap">
-        <div class="doc-field">
-          <label class="doc-label">CPF</label>
-          <input class="form-input" id="docCpf" type="text"
-                 placeholder="000.000.000-00" maxlength="14"
-                 oninput="fmtCpf(this); checkDocs()">
-        </div>
-        <div class="doc-sep">ou</div>
-        <div class="doc-field">
-          <label class="doc-label">CNPJ</label>
-          <input class="form-input" id="docCnpj" type="text"
-                 placeholder="00.000.000/0000-00" maxlength="18"
-                 oninput="fmtCnpj(this); checkDocs()">
-        </div>
-      </div>
-      <div class="doc-error" id="docError">Informe ao menos CPF ou CNPJ.</div>
-    </div>
-
-    <button class="btn-confirm btn-mp" id="mpBtn" onclick="goToMercadoPago()" disabled>
-      Pagar com Mercado Pago
+    <button class="btn-confirm btn-whatsapp-checkout" id="checkoutWaBtn" onclick="finalizarPedido()" disabled>
+      💬 Finalizar pelo WhatsApp
     </button>
   </div>
 </div>
 
 
 <!-- ═══════════════════════════════════════════════════════════
-     MODAL — ADMIN LOGIN
+     MODAL — PIX
 ════════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="pixModal">
+  <div class="modal-box" style="max-width:420px;text-align:center">
+    <button class="modal-close-btn" onclick="closeModal('pixModal')">✕</button>
+
+    <div class="pix-modal-header">
+      <span class="pix-modal-icon">💠</span>
+      <div class="pix-modal-title">Pagamento via PIX</div>
+    </div>
+
+    <div class="pix-modal-receiver">
+      <div class="pix-receiver-label">Favorecido</div>
+      <div class="pix-receiver-name">José Cicero da Silva</div>
+    </div>
+
+    <div class="pix-key-wrap">
+      <div class="pix-key-label">Chave PIX</div>
+      <div class="pix-key-row">
+        <span class="pix-key-value" id="pixKeyDisplay">82996771718</span>
+        <button class="pix-copy-btn" id="pixCopyBtn" onclick="copyPixKey()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+          </svg>
+          Copiar
+        </button>
+      </div>
+      <div class="pix-copied-msg" id="pixCopiedMsg">✓ Chave copiada!</div>
+    </div>
+
+    <div class="pix-note">
+      <span class="pix-note-icon">⚠️</span>
+      <div>
+        <strong>Envio do comprovante obrigatório</strong><br>
+        Após realizar o pagamento, envie o comprovante pelo WhatsApp para confirmar seu pedido.
+      </div>
+    </div>
+
+    <button class="btn-confirm btn-whatsapp-checkout" onclick="finalizarPedido()" style="margin-top:20px">
+      💬 Enviar Pedido pelo WhatsApp
+    </button>
+  </div>
+</div>
+
+
 <div class="modal-overlay" id="adminLoginModal">
   <div class="modal-box" style="max-width:360px">
     <button class="modal-close-btn" onclick="closeModal('adminLoginModal')">✕</button>

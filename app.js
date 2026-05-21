@@ -496,58 +496,60 @@ function removeCartItem(id){
    CHECKOUT — PagarM + Mercado Pago
 ══════════════════════════════════════════════════════════════ */
 
-/* Calcula máximo de parcelas: 1 parcela a cada R$50, máx 4 */
+/* ══════════════════════════════════════════════════════════════
+   CHECKOUT — WhatsApp
+   Fluxo: carrinho → escolhe pagamento → abre WA com resumo
+══════════════════════════════════════════════════════════════ */
+
+const WA_NUMBER = '5582996771718'; // (82) 99677-1718
+
+/* Regra de parcelas:
+   R$ 0–98:   só PIX e Boleto
+   R$ 99–198: até 2x
+   R$ 199–298: até 3x
+   R$ 299+:   até 4x */
 function maxParcelas(total){
-  return Math.min(4, Math.max(1, Math.floor(total / 50)));
+  if(total < 99)  return 1;
+  if(total < 199) return 2;
+  if(total < 299) return 3;
+  return 4;
 }
 
 function openCheckout(){
   if(!cart.length) return;
   closeAllModals();
 
-  const total=cart.reduce((a,b)=>a+b.price,0);
+  const total = cart.reduce((a,b) => a+b.price, 0);
 
   // Resumo do pedido
-  const rows=cart.map(i=>`<div class="order-sum-row"><span>${i.name} (${i.size}) x${i.qty}</span><span>${fmt(i.price)}</span></div>`).join('');
-  el('orderSummary').innerHTML=rows+`<div class="order-sum-total"><span>TOTAL</span><span class="val">${fmt(total)}</span></div>`;
+  const rows = cart.map(i =>
+    `<div class="order-sum-row"><span>${i.name} (${i.size}) x${i.qty}</span><span>${fmt(i.price)}</span></div>`
+  ).join('');
+  el('orderSummary').innerHTML = rows +
+    `<div class="order-sum-total"><span>TOTAL</span><span class="val">${fmt(total)}</span></div>`;
 
-  // Gera opções de pagamento dinamicamente
-  const maxP=maxParcelas(total);
-  const opts=[];
+  // Gera opções de pagamento
+  const maxP = maxParcelas(total);
+  const opts = [];
 
-  // PIX sempre disponível
-  opts.push({
-    pay:'PIX', icon:'💠',
-    label:'PIX',
-    desc:'Aprovação imediata',
-    installments: 1,
-  });
+  opts.push({ pay:'PIX',    icon:'💠', label:'PIX',    desc:'Aprovação imediata',       installments:1 });
 
-  // Parcelado: só aparece se total >= R$100 (mínimo 2 parcelas)
-  if(maxP>=2){
-    for(let p=2;p<=maxP;p++){
+  if(maxP >= 2){
+    for(let p=2; p<=maxP; p++){
       opts.push({
-        pay:`Parcelado ${p}x`,
-        icon:'💳',
+        pay:`Parcelado ${p}x`, icon:'💳',
         label:`${p}x de ${fmt(total/p)}`,
-        desc:`Cartão de crédito · ${p} parcelas sem juros`,
+        desc:`Cartão de crédito · ${p}x sem juros`,
         installments: p,
       });
     }
   }
 
-  // Boleto sempre disponível
-  opts.push({
-    pay:'Boleto', icon:'📄',
-    label:'Boleto',
-    desc:'Vence em 3 dias úteis',
-    installments: 1,
-  });
+  opts.push({ pay:'Boleto', icon:'📄', label:'Boleto', desc:'Vence em 3 dias úteis', installments:1 });
 
-  el('pagarmWrap').innerHTML=opts.map(o=>`
+  el('pagarmWrap').innerHTML = opts.map(o => `
     <button type="button" class="pagarm-opt"
-            data-pay="${o.pay}"
-            data-installments="${o.installments}"
+            data-pay="${o.pay}" data-installments="${o.installments}"
             onclick="selectPay(this)">
       <span class="pagarm-icon">${o.icon}</span>
       <div class="pagarm-text">
@@ -557,107 +559,88 @@ function openCheckout(){
       <span class="pagarm-check">✓</span>
     </button>`).join('');
 
-  // Reset docs e botão
-  el('docCpf').value=''; el('docCnpj').value='';
-  el('docError').style.display='none'; el('mpBtn').disabled=true;
+  // Botão desabilitado até selecionar pagamento
+  el('checkoutWaBtn').disabled = true;
 
   openModal('checkoutModal');
 }
 
 function selectPay(btn){
-  document.querySelectorAll('.pagarm-opt').forEach(b=>b.classList.remove('selected'));
-  btn.classList.add('selected'); checkDocs();
-}
+  document.querySelectorAll('.pagarm-opt').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
 
-function fmtCpf(input){
-  let v=input.value.replace(/\D/g,'').slice(0,11);
-  if(v.length>9) v=v.replace(/(\d{3})(\d{3})(\d{3})(\d{0,2})/,'$1.$2.$3-$4');
-  else if(v.length>6) v=v.replace(/(\d{3})(\d{3})(\d{0,3})/,'$1.$2.$3');
-  else if(v.length>3) v=v.replace(/(\d{3})(\d{0,3})/,'$1.$2');
-  input.value=v;
-}
-function fmtCnpj(input){
-  let v=input.value.replace(/\D/g,'').slice(0,14);
-  if(v.length>12) v=v.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{0,2})/,'$1.$2.$3/$4-$5');
-  else if(v.length>8) v=v.replace(/(\d{2})(\d{3})(\d{3})(\d{0,4})/,'$1.$2.$3/$4');
-  else if(v.length>5) v=v.replace(/(\d{2})(\d{3})(\d{0,3})/,'$1.$2.$3');
-  else if(v.length>2) v=v.replace(/(\d{2})(\d{0,3})/,'$1.$2');
-  input.value=v;
-}
-function checkDocs(){
-  const cpf=el('docCpf').value.replace(/\D/g,'');
-  const cnpj=el('docCnpj').value.replace(/\D/g,'');
-  const docOk=cpf.length===11||cnpj.length===14;
-  const payOk=!!document.querySelector('.pagarm-opt.selected');
-  el('docError').style.display='none';
-  el('mpBtn').disabled=!(docOk&&payOk);
-}
-/* ══════════════════════════════════════════════════════════════
-   CHECKOUT → BACKEND
-   O frontend envia apenas IDs, tamanhos e quantidades.
-   O preço real é calculado no servidor.
-══════════════════════════════════════════════════════════════ */
-
-/* URL do backend — em produção troque pelo domínio real */
-const BACKEND_URL    = 'http://localhost:4000';
-const INTERNAL_KEY   = 'troque-por-uma-chave-secreta-longa-aqui'; // mesma do .env
-
-function goToMercadoPago() {
-  const cpf  = el('docCpf').value.replace(/\D/g, '');
-  const cnpj = el('docCnpj').value.replace(/\D/g, '');
-
-  if (cpf.length !== 11 && cnpj.length !== 14) {
-    el('docError').style.display = 'block';
-    return;
+  if(btn.dataset.pay === 'PIX'){
+    // Esconde botão WA do checkout e abre modal PIX
+    el('checkoutWaBtn').disabled = true;
+    // Pequeno delay para a animação de seleção aparecer antes de abrir o modal
+    setTimeout(() => openModal('pixModal'), 150);
+  } else {
+    el('checkoutWaBtn').disabled = false;
   }
+}
 
-  const payBtn = document.querySelector('.pagarm-opt.selected');
-  if (!payBtn) return;
-
-  const paymentMethod = payBtn.dataset.pay; // ex: "PIX", "Parcelado 2x", "Boleto"
-  const installments  = parseInt(payBtn.dataset.installments ?? '1', 10);
-
-  /* Monta payload com IDs + tamanhos + quantidades — SEM preços */
-  const items = cart.map(i => ({
-    productId: i.pid,
-    size:      i.size,
-    qty:       i.qty,
-  }));
-
-  const payerDoc = cpf.length === 11
-    ? { type: 'CPF',  number: cpf  }
-    : { type: 'CNPJ', number: cnpj };
-
-  /* Desabilita botão e mostra loading */
-  const btn = el('mpBtn');
-  btn.disabled = true;
-  btn.textContent = 'Processando...';
-
-  fetch(`${BACKEND_URL}/api/checkout`, {
-    method:  'POST',
-    headers: {
-      'Content-Type':   'application/json',
-      'x-internal-key': INTERNAL_KEY,
-    },
-    body: JSON.stringify({ items, payerDoc, paymentMethod, installments }),
-  })
-  .then(r => r.json())
-  .then(data => {
-    if (!data.ok || !data.checkoutUrl) {
-      throw new Error(data.error || 'Erro desconhecido.');
-    }
-    /* Limpa carrinho e redireciona para o Mercado Pago */
-    cart = []; saveCart(); updateCartBadge(); closeAllModals();
-    window.open(data.checkoutUrl, '_blank');
-  })
-  .catch(err => {
-    alert('Erro ao criar pagamento: ' + err.message);
-  })
-  .finally(() => {
-    btn.disabled    = false;
-    btn.textContent = 'Pagar com Mercado Pago';
+function copyPixKey(){
+  const key = '82996771718';
+  navigator.clipboard.writeText(key).then(() => {
+    const btn = el('pixCopyBtn');
+    const msg = el('pixCopiedMsg');
+    btn.classList.add('copied');
+    msg.classList.add('show');
+    btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Copiado!`;
+    setTimeout(() => {
+      btn.classList.remove('copied');
+      msg.classList.remove('show');
+      btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copiar`;
+    }, 2500);
+  }).catch(() => {
+    // Fallback para navegadores sem clipboard API
+    const el2 = document.createElement('textarea');
+    el2.value = key;
+    document.body.appendChild(el2);
+    el2.select();
+    document.execCommand('copy');
+    document.body.removeChild(el2);
+    el('pixCopiedMsg').classList.add('show');
+    setTimeout(() => el('pixCopiedMsg').classList.remove('show'), 2500);
   });
 }
+
+function finalizarPedido(){
+  const payBtn = document.querySelector('.pagarm-opt.selected');
+  if(!payBtn) return;
+
+  const pagamento = payBtn.dataset.pay;
+  const total     = cart.reduce((a,b) => a+b.price, 0);
+
+  // Monta mensagem completa com todos os dados do pedido
+  let msg = `🛍 *Novo Pedido — Flow Imports*\n\n`;
+
+  msg += `*🧾 Itens do Pedido:*\n`;
+  cart.forEach(i => {
+    msg += `• *${i.name}*\n`;
+    msg += `  Tamanho: ${i.size} | Qtd: ${i.qty}`;
+    if(i.emb)      msg += `\n  Bordado: ${i.emb}`;
+    if(i.embColor) msg += ` — Cor: ${i.embColor}`;
+    if(i.obs)      msg += `\n  Obs: ${i.obs}`;
+    msg += `\n  Valor: ${fmt(i.price)}\n`;
+  });
+
+  msg += `\n💳 *Forma de Pagamento:* ${pagamento}`;
+  msg += `\n💰 *Total: ${fmt(total)}*`;
+
+  if(pagamento === 'PIX'){
+    msg += `\n\n📋 *Chave PIX:* 82996771718 (Celular)`;
+    msg += `\n*Favorecido:* José Cicero da Silva`;
+    msg += `\n\n⚠️ _Lembre-se de enviar o comprovante para confirmar o pedido!_`;
+  }
+
+  msg += `\n\nOlá! Gostaria de finalizar esse pedido. 😊`;
+
+  // Limpa carrinho e abre WhatsApp
+  cart = []; saveCart(); updateCartBadge(); closeAllModals();
+  window.open(`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank');
+}
+
 
 /* ══════════════════════════════════════════════════════════════
    ADMIN
